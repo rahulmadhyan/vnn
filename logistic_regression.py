@@ -1,110 +1,115 @@
 import numpy as np
 import cv2
 import os
+import matplotlib.pyplot as plt
+from PIL import Image
+
 
 ### PRE_PROCESSING ###
 
-# Loads images from folder
+# Loads images from 
+# Resize image to 'new_pixels'
 # Returns array of images and array of labels
-def load_images_and_create_label(folder):
+def load_images_and_create_label(folder, new_pixels):
     images = []
     labels = []
     for filename in os.listdir(folder):
         img = cv2.imread(os.path.join(folder,filename))
         if img is not None:
+            img = cv2.resize(img, (new_pixels, new_pixels))
             images.append(img)
             if filename.find("cat") == -1:
-            	# dog
-            	labels.append(1)
+                # dog 
+                labels.append(1)
             else:
-            	# cat
-            	labels.append(0)
+                # cat
+                labels.append(0)
     return images, labels
 
 ### HELPER FUNCTIONS ###
 
 # Sigmoid non-linearity
 def sigmoid(z):
-	return 1 / (1 + np.exp(-z))
+    return 1 / (1 + np.exp(-z))
 
 # Initializes weights and biases with zeros
 def init_with_zeros(dimension):
 
-	w = np.zeros(shape = (dimension, 1))
-	b = 0
+    w = np.zeros(shape = (dimension, 1))
+    b = 0
 
-	return w,b
+    return w,b
 
 def propogate(w, b, X, Y):
 
-	# w - weights
-	# b - bias
-	# X - input label (px * px * 3, number of examples)
-	# Y - output label
+    # w - weights
+    # b - bias
+    # X - input label (px * px * 3, number of examples)
+    # Y - output label
 
-	m = X.shape(1) # number of examples
+    m = X.shape(1) # number of examples
 
-	A = sigmoid(np.dot(w.T, X) + b) # compute activation
-	cost = (-1 / m) * np.sum((Y * np.log(A)) + ((1 - Y) * np.log(1 - A)))
+    A = sigmoid(np.dot(w.T, X) + b) # compute activation
+    cost = (-1 / m) * np.sum((Y * np.log(A)) + ((1 - Y) * np.log(1 - A)))
 
-	dw = (1 / m) * np.dot(X, (A - Y).T)
-	db = (1 / m) * np.sum(A - Y)
+    dw = (1 / m) * np.dot(X, (A - Y).T)
+    db = (1 / m) * np.sum(A - Y)
 
-	# saving local gradients for backpropagation
-	grads = {"dw" : dw,
-			 "db" : db}
+    # saving local gradients for backpropagation
+    grads = {"dw" : dw,
+             "db" : db}
 
-	return grads, cost		 
+    return grads, cost         
 
 # Optimizes w and b by running gradient descent
-def optimize (w, b, X, Y, number_iterations, learning_rate, print_cost = False):	
+def optimize (w, b, X, Y, number_iterations, learning_rate, print_cost = False):    
 
-	costs = []
+    costs = []
 
-	for i in range(number_iterations):
+    for i in range(number_iterations):
 
-		grads, cost = propogate(w, b, X, Y)
+        grads, cost = propogate(w, b, X, Y)
 
-		dw = grads["dw"]
-		db = grads["db"]
+        dw = grads["dw"]
+        db = grads["db"]
 
-		# gradient descent
-		w = w - learning_rate * dw
-		b = b - learning_rate * db
+        # gradient descent
+        w = w - learning_rate * dw
+        b = b - learning_rate * db
 
-		if i % 100 == 0:
-			costs.append(cost)
+        if i % 100 == 0:
+            costs.append(cost)
         
-		if print_cost and i % 100 == 0:
-			print ("Cost after iteration %i: %f" % (i, cost))
+        if print_cost and i % 100 == 0:
+            print ("Cost after iteration %i: %f" % (i, cost))
 
-	params = {"w" : w,
-			  "b" : b}
+    params = {"w" : w,
+              "b" : b}
 
-	grads = {"dw" : dw,
-	  		 "db" : db}
+    grads = {"dw" : dw,
+               "db" : db}
 
-	return params, grads, costs
+    return params, grads, costs
 
 # Predicts whether the label is 0 or 1 based on learned weights and bias
 def predict(w, b, X):
 
-	m = X.shape[1] 
-	w = w.reshape(X.shape[0], 1)
+    m = X.shape[1] 
+    w = w.reshape(X.shape[0], 1)
 
-	Y_Prediction = np.zeros((1, m))
+    Y_Prediction = np.zeros((1, m))
 
-	A = sigmoid(np.dot(W.T, x) + b)
+    A = sigmoid(np.dot(W.T, x) + b)
 
-	for i in range(A.shape[1]):
+    for i in range(A.shape[1]):
 
-		Y_Prediction[0, i] = 1 if A[0, i] > 0.5 else 0
+        Y_Prediction[0, i] = 1 if A[0, i] > 0.5 else 0
 
-	return Y_Prediction
+    return Y_Prediction
 
 ### MODEL ###
 
-# Builds the logistic regression model using helper functions	
+# Builds the logistic regression model using helper functions    
 def model(X_train, Y_train, X_test, Y_test, number_iterations = 2000, learning_rate = 0.5, print_cost = False):
 
 
@@ -148,6 +153,5 @@ def model(X_train, Y_train, X_test, Y_test, number_iterations = 2000, learning_r
 
 if __name__ == "__main__":
     
-    images_train,labels_train = load_images_and_create_label('/Users/rahulmadhyan/Documents/AI/Neural Networks/Vanilla NN/Data/train')
-
-
+    images_train,labels_train = load_images_and_create_label('/Users/rahulmadhyan/Documents/AI/Neural Networks/Vanilla NN/Data/train', 64)
+    
