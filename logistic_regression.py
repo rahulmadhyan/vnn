@@ -1,4 +1,27 @@
 import numpy as np
+import cv2
+import os
+
+### PRE_PROCESSING ###
+
+# Loads images from folder
+# Returns array of images and array of labels
+def load_images_and_create_label(folder):
+    images = []
+    labels = []
+    for filename in os.listdir(folder):
+        img = cv2.imread(os.path.join(folder,filename))
+        if img is not None:
+            images.append(img)
+            if filename.find("cat") == -1:
+            	# dog
+            	labels.append(1)
+            else:
+            	# cat
+            	labels.append(0)
+    return images, labels
+
+### HELPER FUNCTIONS ###
 
 # Sigmoid non-linearity
 def sigmoid(z):
@@ -50,10 +73,10 @@ def optimize (w, b, X, Y, number_iterations, learning_rate, print_cost = False):
 		b = b - learning_rate * db
 
 		if i % 100 == 0:
-            costs.append(cost)
+			costs.append(cost)
         
-        if print_cost and i % 100 == 0:
-            print ("Cost after iteration %i: %f" % (i, cost))
+		if print_cost and i % 100 == 0:
+			print ("Cost after iteration %i: %f" % (i, cost))
 
 	params = {"w" : w,
 			  "b" : b}
@@ -78,7 +101,9 @@ def predict(w, b, X):
 		Y_Prediction[0, i] = 1 if A[0, i] > 0.5 else 0
 
 	return Y_Prediction
-	
+
+### MODEL ###
+
 # Builds the logistic regression model using helper functions	
 def model(X_train, Y_train, X_test, Y_test, number_iterations = 2000, learning_rate = 0.5, print_cost = False):
 
@@ -120,4 +145,9 @@ def model(X_train, Y_train, X_test, Y_test, number_iterations = 2000, learning_r
          "num_iterations": num_iterations}
 
     return d
+
+if __name__ == "__main__":
     
+    images_train,labels_train = load_images_and_create_label('/Users/rahulmadhyan/Documents/AI/Neural Networks/Vanilla NN/Data/train')
+
+
