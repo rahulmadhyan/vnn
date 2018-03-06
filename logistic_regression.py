@@ -4,7 +4,6 @@ import os
 import matplotlib.pyplot as plt
 from PIL import Image
 
-
 ### PRE_PROCESSING ###
 
 # Loads images from 
@@ -47,10 +46,10 @@ def propogate(w, b, X, Y):
     # X - input label (px * px * 3, number of examples)
     # Y - output label
 
-    m = X.shape(1) # number of examples
+    m = X.shape[1] # number of examples
 
     A = sigmoid(np.dot(w.T, X) + b) # compute activation
-    cost = (-1 / m) * np.sum((Y * np.log(A)) + ((1 - Y) * np.log(1 - A)))
+    cost = (- 1 / m) * np.sum(Y * np.log(A) + (1 - Y) * (np.log(1 - A)))
 
     dw = (1 / m) * np.dot(X, (A - Y).T)
     db = (1 / m) * np.sum(A - Y)
@@ -99,7 +98,7 @@ def predict(w, b, X):
 
     Y_Prediction = np.zeros((1, m))
 
-    A = sigmoid(np.dot(W.T, x) + b)
+    A = sigmoid(np.dot(w.T, X) + b)
 
     for i in range(A.shape[1]):
 
@@ -127,7 +126,7 @@ def model(X_train, Y_train, X_test, Y_test, number_iterations = 2000, learning_r
     w,b = init_with_zeros(X_train.shape[0])
 
     # gradient descent
-    parameters, grads, costs = optimize(w, b, X_train, X_test, number_iterations, learning_rate, print_cost)
+    parameters, grads, costs = optimize(w, b, X_train, Y_train, number_iterations, learning_rate, print_cost)
 
     # retrieve parameters from "parameters" dictionary after training
     w = parameters["w"]
@@ -137,21 +136,38 @@ def model(X_train, Y_train, X_test, Y_test, number_iterations = 2000, learning_r
     Y_Prediction_Train = predict(w, b, X_train)
 
     # print train/test Errors
-    print("train accuracy: {} %".format(100 - np.mean(np.abs(Y_prediction_train - Y_train)) * 100))
-    print("test accuracy: {} %".format(100 - np.mean(np.abs(Y_prediction_test - Y_test)) * 100))
+    print("Train accuracy: {} %".format(100 - np.mean(np.abs(Y_Prediction_Train - Y_train)) * 100))
+    print("Test accuracy: {} %".format(100 - np.mean(np.abs(Y_Prediction_Test - Y_test)) * 100))
 
     
     d = {"costs": costs,
-         "Y_prediction_test": Y_prediction_test, 
-         "Y_prediction_train" : Y_prediction_train, 
+         "Y_prediction_test": Y_Prediction_Test, 
+         "Y_prediction_train" : Y_Prediction_Train, 
          "w" : w, 
          "b" : b,
          "learning_rate" : learning_rate,
-         "num_iterations": num_iterations}
+         "num_iterations": number_iterations}
 
     return d
 
 if __name__ == "__main__":
     
+    # load train images and labels
     images_train,labels_train = load_images_and_create_label('/Users/rahulmadhyan/Documents/AI/Neural Networks/Vanilla NN/Data/train', 64)
-    
+    images_train = np.array(images_train)
+    labels_train = np.array(labels_train)
+
+    # load test images and labels
+    images_test,labels_test = load_images_and_create_label('/Users/rahulmadhyan/Documents/AI/Neural Networks/Vanilla NN/Data/test1', 64)
+    images_test = np.array(images_test)
+    labels_test = np.array(labels_test)
+
+    # flatten dataset
+    images_train = images_train.reshape(images_train.shape[0], -1).T
+    images_test = images_test.reshape(images_test.shape[0], -1).T
+
+    #standaradize the dataset
+    images_train = images_train / 255
+    images_test = images_test / 255
+
+    model(images_train, labels_train, images_test, labels_test, 2000, 0.0005, True)
